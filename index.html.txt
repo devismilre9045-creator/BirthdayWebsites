@@ -1,0 +1,647 @@
+```python
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <style>
+        :root {
+            --dark-bg: #10101a;
+            --primary-glow: #00f2ea;
+            --secondary-glow: #ff00ff;
+            --text-color: #f0f0f0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --font-main: 'Inter', sans-serif;
+            --font-accent: 'Orbitron', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Orbitron:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary-glow), var(--secondary-glow));
+            border-radius: 4px;
+        }
+
+        /* Animated Background */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        #particle-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Main Content Styling */
+        .content-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 20px;
+            position: relative;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease-out, transform 1.2s ease-out;
+        }
+
+        .content-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            font-family: var(--font-accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 700;
+            color: #fff;
+            text-shadow:
+                0 0 10px var(--primary-glow),
+                0 0 20px var(--primary-glow),
+                0 0 40px var(--primary-glow),
+                0 0 80px var(--secondary-glow);
+            animation: flicker 3s infinite alternate;
+        }
+
+        h2 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin-bottom: 40px;
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: var(--glass-bg);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow:
+                    0 0 10px var(--primary-glow),
+                    0 0 20px var(--primary-glow),
+                    0 0 40px var(--primary-glow),
+                    0 0 80px var(--secondary-glow);
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        /* Section Specific Styles */
+
+        /* Hero Section */
+        #hero {
+            justify-content: center;
+        }
+        #hero .subtitle {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-glow);
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-20px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        /* Memory Lane Section */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .gallery-item {
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid var(--secondary-glow);
+            box-shadow: 0 0 15px var(--secondary-glow);
+            position: relative;
+            aspect-ratio: 1 / 1;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .gallery-item:hover .caption {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Timeline Section */
+        .timeline {
+            position: relative;
+            width: 100%;
+            padding: 40px 0;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(var(--primary-glow), var(--secondary-glow));
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-item.left {
+            left: 0;
+            padding-right: 70px; /* Space for the orb */
+        }
+        .timeline-item.right {
+            left: 50%;
+            padding-left: 70px; /* Space for the orb */
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -12.5px;
+            background-color: var(--dark-bg);
+            border: 4px solid var(--primary-glow);
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            z-index: 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .timeline-item.left::after {
+            right: 17.5px;
+        }
+        .timeline-item.right::after {
+            left: 17.5px;
+        }
+        .timeline-item:hover::after {
+            transform: translateY(-50%) scale(1.5);
+            background-color: var(--primary-glow);
+        }
+        .timeline-content {
+            text-align: right;
+        }
+        .timeline-item.right .timeline-content {
+            text-align: left;
+        }
+        .timeline-content h3 {
+            font-family: var(--font-accent);
+            color: var(--secondary-glow);
+        }
+
+        /* Wishes Section */
+        #wishes-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            max-width: 800px;
+            margin-top: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 15px white;
+            animation: twinkle 5s infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .star:hover {
+            transform: scale(2.5);
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        #wish-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+        #wish-popup .glass-card {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+        #wish-popup p { margin-bottom: 0; }
+        #close-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Final section */
+        #final-message .btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-family: var(--font-accent);
+            text-decoration: none;
+            color: var(--dark-bg);
+            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #final-message .btn:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <canvas id="particle-canvas"></canvas>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="content-section">
+        <!-- EDIT THIS: Change [Friend's Name] to your friend's name -->
+        <h1>Happy Birthday,<br>[Friend's Name]!</h1>
+        <p class="subtitle">A journey through time, just for you.</p>
+        <div class="scroll-indicator">
+            <span>Scroll Down &darr;</span>
+        </div>
+    </section>
+
+    <!-- MEMORY LANE SECTION -->
+    <section id="memory-lane" class="content-section">
+        <div class="container">
+            <h2>Our Memory Lane</h2>
+            <p>Remember when...? Here are just a few of the moments that I'll never forget.</p>
+            <div class="gallery">
+                <!-- EDIT THIS: Replace image URLs and captions -->
+                <!-- Use a square image for best results (e.g., 600x600) -->
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1517673132405-a56a62b18caf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDN8fGZyaWVuZHMlMjBsYXVnaGluZ3xlbnwwfHx8fDE2NTg0MjI0NTA&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 1">
+                    <div class="caption">The day we couldn't stop laughing.</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxjb25jZXJ0fGVufDB8fHx8MTY1ODQyMjUwMw&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 2">
+                    <div class="caption">That epic concert night!</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDd8fG1vdmllJTIwbmlnaHR8ZW58MHx8fHwxNjU4NDIyNTI4&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 3">
+                    <div class="caption">Countless movie marathons.</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1505260533461-32649b851963?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEyfHxyb2FkJTIwdHJpcHxlbnwwfHx8fDE2NTg0MjI1NTc&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 4">
+                    <div class="caption">Our unforgettable road trip.</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1607556723239-b738e4544869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDE0fHxwaXp6YSUyMG5pZ2h0fGVufDB8fHx8MTY1ODQyMjU4Mg&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 5">
+                    <div class="caption">Late night pizza and deep talks.</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1559825481-12a05cc00344?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGJlYWNoJTIwc3Vuc2V0fGVufDB8fHx8MTY1ODQyMjYwNQ&ixlib=rb-1.2.1&q=80&w=600" alt="Memory 6">
+                    <div class="caption">Watching the sunset and dreaming big.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIMELINE SECTION -->
+    <section id="timeline" class="content-section">
+        <div class="container">
+            <h2>A Timeline of Our Friendship</h2>
+            <div class="timeline">
+                <!-- EDIT THIS: Change dates and descriptions -->
+                <div class="timeline-item left">
+                    <div class="timeline-content glass-card">
+                        <h3>2018 - The Beginning</h3>
+                        <p>The day our paths crossed. Little did we know what an amazing journey was about to begin!</p>
+                    </div>
+                </div>
+                <div class="timeline-item right">
+                    <div class="timeline-content glass-card">
+                        <h3>2019 - The Adventure</h3>
+                        <p>Our first big adventure together. That trip defined so much and brought us even closer.</p>
+                    </div>
+                </div>
+                <div class="timeline-item left">
+                    <div class="timeline-content glass-card">
+                        <h3>2021 - Through Thick & Thin</h3>
+                        <p>We were there for each other through some tough times. Proved our friendship is unbreakable.</p>
+                    </div>
+                </div>
+                <div class="timeline-item right">
+                    <div class="timeline-content glass-card">
+                        <h3>2024 - Making New Memories</h3>
+                        <p>This year has been incredible for creating new memories we'll cherish forever.</p>
+                    </div>
+                </div>
+                 <div class="timeline-item left">
+                    <div class="timeline-content glass-card">
+                        <h3>Today - Your Day!</h3>
+                        <p>Celebrating you and the amazing person you are. Here's to many more years of friendship!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WISHES SECTION -->
+    <section id="wishes" class="content-section">
+        <div class="container">
+            <h2>A Galaxy of Wishes for You</h2>
+            <p>Click on the stars to reveal my wishes for your year ahead. Each one is for you.</p>
+            <div id="wishes-container" class="glass-card">
+                <!-- Stars will be dynamically generated here by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- POPUP FOR WISHES -->
+    <div id="wish-popup">
+        <div class="glass-card">
+            <span id="close-popup">&times;</span>
+            <p id="wish-text"></p>
+        </div>
+    </div>
+
+
+    <!-- FINAL MESSAGE SECTION -->
+    <section id="final-message" class="content-section">
+        <div class="container">
+            <h2>To My Best Friend,</h2>
+            <!-- EDIT THIS: Write your own personal message -->
+            <p class="glass-card">
+                Your friendship is one of the greatest gifts in my life. You bring so much joy, laughter, and support, and I can't imagine my world without you. I hope this next year of your life is filled with everything you're hoping for - more adventure, more success, and more happiness than you can imagine. You deserve it all.
+            </p>
+            <p>Happy Birthday, once again!</p>
+            <!-- EDIT THIS: You can change the link and text on the button -->
+            <a href="#" class="btn">Let's Celebrate Soon!</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Created with &hearts; by [Your Name]</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- PARTICLE BACKGROUND ANIMATION ---
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const numParticles = Math.floor(window.innerWidth / 15);
+
+            class Particle {
+                constructor(x, y, size, speedX, speedY, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = size;
+                    this.speedX = speedX;
+                    this.speedY = speedY;
+                    this.color = color;
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                    if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < numParticles; i++) {
+                    const size = Math.random() * 2 + 0.5;
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    const speedX = Math.random() * 0.4 - 0.2;
+                    const speedY = Math.random() * 0.4 - 0.2;
+                    const color = Math.random() > 0.5 ? '#00f2ea' : '#ff00ff';
+                    particles.push(new Particle(x, y, size, speedX, speedY, color));
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const particle of particles) {
+                    particle.update();
+                    particle.draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initParticles();
+            });
+
+
+            // --- SCROLL-BASED FADE-IN ANIMATION ---
+            const sections = document.querySelectorAll('.content-section');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // --- WISHES GALAXY INTERACTION ---
+            const wishesContainer = document.getElementById('wishes-container');
+            const wishPopup = document.getElementById('wish-popup');
+            const wishText = document.getElementById('wish-text');
+            const closePopup = document.getElementById('close-popup');
+            const numStars = 20;
+
+            // EDIT THIS: Add your own wishes here
+            const wishes = [
+                "May your year be filled with incredible adventures.",
+                "Wishing you success in everything you pursue.",
+                "Hope you find joy in the small things.",
+                "May you be surrounded by love and laughter always.",
+                "Wishing you strength to overcome any challenge.",
+                "May your creativity and passions flourish.",
+                "Hope you get to travel to a place you've always dreamed of.",
+                "Wishing you peace and contentment.",
+                "May you make unforgettable memories this year.",
+                "Hope you laugh until your stomach hurts, often.",
+                "Wishing you health and happiness above all.",
+                "May you continue to inspire everyone around you.",
+                "Hope you feel celebrated every single day.",
+                "Wishing you a year as amazing as you are.",
+                "May all your dreams, big and small, come true.",
+                "Hope you have the courage to chase new horizons.",
+                "Wishing you moments of pure bliss.",
+                "May our friendship grow even stronger.",
+                "Hope you get to relax and recharge.",
+                "Wishing you a future that is bright and beautiful."
+            ];
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.top = `${Math.random() * 95}%`;
+                star.style.left = `${Math.random() * 95}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // Assign a wish to the star
+                star.dataset.wish = wishes[i % wishes.length];
+
+                star.addEventListener('click', (e) => {
+                    wishText.textContent = e.target.dataset.wish;
+                    wishPopup.style.display = 'block';
+                });
+
+                wishesContainer.appendChild(star);
+            }
+
+            closePopup.addEventListener('click', () => {
+                wishPopup.style.display = 'none';
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target === wishPopup) {
+                    wishPopup.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+"""
+with open("birthday_greeting.html", "w") as f:
+    f.write(html_content)
+
+print("Created birthday_greeting.html")
+```
